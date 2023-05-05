@@ -1,0 +1,11 @@
+version: '3'
+services:
+  dind:
+    image: docker:dind
+    privileged: true
+    ports:
+      - "23750:2375"
+    environment:
+      DOCKER_TLS_CERTDIR: ""
+      DOCKER_HOST: "tcp://0.0.0.0:2375"
+      DOCKER_TLS: "false"

@@ -1,0 +1,13 @@
+version: "3.9"
+
+services:
+  docker:
+    image: docker:dind
+    ports:
+      - "2375:2375"
+    privileged: true
+    volumes:
+      - dind-data:/var/lib/docker
+
+volumes:
+  dind-data:
