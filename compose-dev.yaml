@@ -1,11 +1,11 @@
-version: "3"
-
+version: '3'
 services:
-  docker-proxy:
-    image: alpine/socat
-    command: tcp-listen:2375,fork,reuseaddr unix-connect:/var/run/docker.sock
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
+  dind:
+    image: docker:dind
+    privileged: true
     ports:
-      - "127.0.0.1:23750:2375"
-    restart: always
+      - "23750:2375"
+    environment:
+      DOCKER_TLS_CERTDIR: ""
+      DOCKER_HOST: "tcp://0.0.0.0:2375"
+      DOCKER_TLS: "false"
