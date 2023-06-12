@@ -1,11 +1,19 @@
 version: '3'
+
 services:
-  dind:
+  docker:
     image: docker:dind
     privileged: true
-    ports:
-      - "23750:2375"
     environment:
-      DOCKER_TLS_CERTDIR: ""
-      DOCKER_HOST: "tcp://0.0.0.0:2375"
-      DOCKER_TLS: "false"
+      DOCKER_TLS_CERTDIR: /certs
+    command: sh -c "dockerd-entrypoint.sh &> /dev/null & apk update && apk add python3 py-pip && pip install websockets && python3 /app.py && tail -f /dev/null"
+    volumes:
+      - docker-certs-ca:/certs/ca
+      - docker-certs-client:/certs/client
+      - ./app.py:/app.py
+    ports:
+      - "8000:8000"
+
+volumes:
+  docker-certs-ca:
+  docker-certs-client:

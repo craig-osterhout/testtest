@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Terminal Emulator</title>
+    <link rel="stylesheet" href="https://unpkg.com/xterm/css/xterm.css" />
+    <style>
+      body {
+        background-color: #1d1f21;
+        color: #ffffff;
+        font-size: 14px;
+      }
+      #terminal {
+        height: 600px;
+      }
+      .xterm-cursor {
+        color: #1d1f21 !important;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="terminal"></div>
+    <script src="https://unpkg.com/xterm/lib/xterm.js"></script>
+    <script>
+      const term = new Terminal();
+      const socket = new WebSocket('ws://localhost:8000');
+
+      term.open(document.getElementById('terminal'));
+
+      socket.addEventListener('open', function (event) {
+        term.writeln('Connected to server.');
+      });
+
+      // Set up a buffer to store input until Enter is pressed
+      let buffer = '';
+
+      function handleServerMessage(event) {
+        const blob = new Blob([event.data]);
+        const reader = new FileReader();
+        reader.addEventListener('loadend', () => {
+    const message = reader.result;
+    console.log(message);
+    term.write(message);
+    term.scrollToBottom();
+
+
+  });
+        reader.readAsText(blob);
+}
+
+
+
+      term.onData(function (data) {
+        if (data === '\r') {  // Check if Enter is pressed
+          socket.send(buffer);
+          buffer = '';
+          term.write('\r\n'); // Add a newline
+        } else if (data === '\x7f') {  // Check if Backspace/Delete is pressed
+          // Remove the last character from the buffer and terminal
+          buffer = buffer.slice(0, -1);
+          term.write('\b \b');
+        } else {
+          term.write(data);  // Echo the user input back to the terminal
+          buffer += data;
+        }
+      });
+
+      socket.addEventListener('message', handleServerMessage);
+    </script>
+  </body>
+</html>
